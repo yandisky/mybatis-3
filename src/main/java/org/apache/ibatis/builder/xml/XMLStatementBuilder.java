@@ -54,6 +54,7 @@ public class XMLStatementBuilder extends BaseBuilder {
   }
 
   public void parseStatementNode() {
+    //在命名空间中唯一的标识符,可以被用来引用这条语句
     String id = context.getStringAttribute("id");
     String databaseId = context.getStringAttribute("databaseId");
 
@@ -64,9 +65,12 @@ public class XMLStatementBuilder extends BaseBuilder {
     Integer fetchSize = context.getIntAttribute("fetchSize");
     Integer timeout = context.getIntAttribute("timeout");
     String parameterMap = context.getStringAttribute("parameterMap");
+    //会传入这条语句的参数类的完全限定名或别名
     String parameterType = context.getStringAttribute("parameterType");
     Class<?> parameterTypeClass = resolveClass(parameterType);
+    //外部resultMap的命名引用
     String resultMap = context.getStringAttribute("resultMap");
+    //从这条语句中返回的期望类型的类的完全限定名或别名
     String resultType = context.getStringAttribute("resultType");
     String lang = context.getStringAttribute("lang");
     LanguageDriver langDriver = getLanguageDriver(lang);
@@ -79,7 +83,10 @@ public class XMLStatementBuilder extends BaseBuilder {
     String nodeName = context.getNode().getNodeName();
     SqlCommandType sqlCommandType = SqlCommandType.valueOf(nodeName.toUpperCase(Locale.ENGLISH));
     boolean isSelect = sqlCommandType == SqlCommandType.SELECT;
+    //flushCache和useCache都和二级缓存有关
+    //将其设置为true后,只要语句被调用,都会导致本地缓存和二级缓存被清空,默认值:false
     boolean flushCache = context.getBooleanAttribute("flushCache", !isSelect);
+    //将其设置为 true 后，将会导致本条语句的结果被二级缓存缓存起来，默认值：对 select 元素为 true
     boolean useCache = context.getBooleanAttribute("useCache", isSelect);
     boolean resultOrdered = context.getBooleanAttribute("resultOrdered", false);
 

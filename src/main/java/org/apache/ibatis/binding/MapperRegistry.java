@@ -64,6 +64,7 @@ public class MapperRegistry {
       }
       boolean loadCompleted = false;
       try {
+        //接口类型(key)->工厂类
         knownMappers.put(type, new MapperProxyFactory<T>(type));
         // It's important that the type is added before the parser is run
         // otherwise the binding may automatically be attempted by the

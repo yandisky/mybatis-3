@@ -46,12 +46,13 @@ public class MapperMethod {
   private final MethodSignature method;
 
   public MapperMethod(Class<?> mapperInterface, Method method, Configuration config) {
-    this.command = new SqlCommand(config, mapperInterface, method);
-    this.method = new MethodSignature(config, mapperInterface, method);
+    this.command = new SqlCommand(config, mapperInterface, method);//记录sql语句及语句类型
+    this.method = new MethodSignature(config, mapperInterface, method);//记录Mapper接口中方法信息
   }
 
   public Object execute(SqlSession sqlSession, Object[] args) {
     Object result;
+    //根据命令类型走不行的操作command.getType()是select
     switch (command.getType()) {
       case INSERT: {
       Object param = method.convertArgsToSqlCommandParam(args);
@@ -79,6 +80,7 @@ public class MapperMethod {
         } else if (method.returnsCursor()) {
           result = executeForCursor(sqlSession, args);
         } else {
+          //将参数转换为SQL的参数
           Object param = method.convertArgsToSqlCommandParam(args);
           result = sqlSession.selectOne(command.getName(), param);
         }
@@ -133,9 +135,11 @@ public class MapperMethod {
     List<E> result;
     Object param = method.convertArgsToSqlCommandParam(args);
     if (method.hasRowBounds()) {
+      //特定的RowBound参数
       RowBounds rowBounds = method.extractRowBounds(args);
       result = sqlSession.<E>selectList(command.getName(), param, rowBounds);
     } else {
+      //正常情况
       result = sqlSession.<E>selectList(command.getName(), param);
     }
     // issue #510 Collections & arrays support

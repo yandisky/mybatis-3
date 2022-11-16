@@ -121,19 +121,23 @@ public class MapperAnnotationBuilder {
   public void parse() {
     String resource = type.toString();
     if (!configuration.isResourceLoaded(resource)) {
-      loadXmlResource();
+      //如果mybatis-config配置的是xml文件这里不会再次解析，如果配置的是Mapper接口，则会进入并完成xml映射文件的解析
+      loadXmlResource();//解析xml映射文件
       configuration.addLoadedResource(resource);
       assistant.setCurrentNamespace(type.getName());
       parseCache();
       parseCacheRef();
-      Method[] methods = type.getMethods();
+      Method[] methods = type.getMethods();//遍历Mapper中的方法
       for (Method method : methods) {
         try {
           // issue #237
           if (!method.isBridge()) {
+            //解析Mapper接口中的所有方法，并将其存到configuration属性中的mappedStatements，mappedStatements是一个StrickMap，继承了HashMap。
+            //重写了set和get等一些方法，主要是为了处理重复key的问题。我们知道HashMap中重复key会被覆盖，这里显然不行，所以需要重写，当key重复就直接抛异常
             parseStatement(method);
           }
         } catch (IncompleteElementException e) {
+          //失败了则存储到IncompleteMethod中，等后面解析
           configuration.addIncompleteMethod(new MethodResolver(this, method));
         }
       }

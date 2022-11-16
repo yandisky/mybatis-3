@@ -59,7 +59,9 @@ public class SimpleExecutor extends BaseExecutor {
     try {
       Configuration configuration = ms.getConfiguration();
       StatementHandler handler = configuration.newStatementHandler(wrapper, ms, parameter, rowBounds, resultHandler, boundSql);
-      stmt = prepareStatement(handler, ms.getStatementLog());
+      //获取Statement，而根据ms.getStatementLog()获取Connection
+      //当前sql还是占位符的方式，并没有将参数设置进去。所以这里需要prepareStatement方法创建Statement对象的时候会去设置参数，替换占位符。
+      stmt = prepareStatement(handler, ms.getStatementLog());//创建Statement对象，并进行参数设置
       return handler.<E>query(stmt, resultHandler);
     } finally {
       closeStatement(stmt);
@@ -82,8 +84,8 @@ public class SimpleExecutor extends BaseExecutor {
   private Statement prepareStatement(StatementHandler handler, Log statementLog) throws SQLException {
     Statement stmt;
     Connection connection = getConnection(statementLog);
-    stmt = handler.prepare(connection, transaction.getTimeout());
-    handler.parameterize(stmt);
+    stmt = handler.prepare(connection, transaction.getTimeout());//初始化Statement对象
+    handler.parameterize(stmt);//参数化，进行参数设置
     return stmt;
   }
 

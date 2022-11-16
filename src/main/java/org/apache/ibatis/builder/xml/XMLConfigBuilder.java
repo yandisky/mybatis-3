@@ -96,6 +96,7 @@ public class XMLConfigBuilder extends BaseBuilder {
       throw new BuilderException("Each XMLConfigBuilder can only be used once.");
     }
     parsed = true;
+    //读取配置文件一级节点configuration
     parseConfiguration(parser.evalNode("/configuration"));
     return configuration;
   }
@@ -103,19 +104,26 @@ public class XMLConfigBuilder extends BaseBuilder {
   private void parseConfiguration(XNode root) {
     try {
       //issue #117 read properties first
+      //properties 标签，用来配置参数信息，比如数据库连接信息
       propertiesElement(root.evalNode("properties"));
       Properties settings = settingsAsProperties(root.evalNode("settings"));
       loadCustomVfs(settings);
+      //实体别名两种方式：1，指定单个实体；2，指定包；
       typeAliasesElement(root.evalNode("typeAliases"));
+      //插件
       pluginElement(root.evalNode("plugins"));
+      //用来创建对象（数据库数据映射成java对象）
       objectFactoryElement(root.evalNode("objectFactory"));
       objectWrapperFactoryElement(root.evalNode("objectWrapperFactory"));
       reflectorFactoryElement(root.evalNode("reflectorFactory"));
       settingsElement(settings);
       // read it after objectFactory and objectWrapperFactory issue #631
+      //数据库环境
       environmentsElement(root.evalNode("environments"));
       databaseIdProviderElement(root.evalNode("databaseIdProvider"));
+      //数据库类型和Java数据类型的转换
       typeHandlerElement(root.evalNode("typeHandlers"));
+      //对数据库增删改查的解析
       mapperElement(root.evalNode("mappers"));
     } catch (Exception e) {
       throw new BuilderException("Error parsing SQL Mapper Configuration. Cause: " + e, e);
@@ -360,23 +368,29 @@ public class XMLConfigBuilder extends BaseBuilder {
     if (parent != null) {
       for (XNode child : parent.getChildren()) {
         if ("package".equals(child.getName())) {
+          //解析<package name=""/>
           String mapperPackage = child.getStringAttribute("name");
+          //包路径存到mapperRegistry中
           configuration.addMappers(mapperPackage);
         } else {
+          //解析<mapper url="" class="" resource=""></mapper>
           String resource = child.getStringAttribute("resource");
           String url = child.getStringAttribute("url");
           String mapperClass = child.getStringAttribute("class");
           if (resource != null && url == null && mapperClass == null) {
+            //解析通过resource配置全限定路径xml映射文件方式
             ErrorContext.instance().resource(resource);
             InputStream inputStream = Resources.getResourceAsStream(resource);
             XMLMapperBuilder mapperParser = new XMLMapperBuilder(inputStream, configuration, resource, configuration.getSqlFragments());
             mapperParser.parse();
           } else if (resource == null && url != null && mapperClass == null) {
+            //解析通过url配置本地或者远程xml映射文件方式
             ErrorContext.instance().resource(url);
             InputStream inputStream = Resources.getUrlAsStream(url);
             XMLMapperBuilder mapperParser = new XMLMapperBuilder(inputStream, configuration, url, configuration.getSqlFragments());
             mapperParser.parse();
           } else if (resource == null && url == null && mapperClass != null) {
+            //解析通过配置Mapper接口路径方式（class）
             Class<?> mapperInterface = Resources.classForName(mapperClass);
             configuration.addMapper(mapperInterface);
           } else {

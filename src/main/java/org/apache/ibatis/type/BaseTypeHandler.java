@@ -42,7 +42,7 @@ public abstract class BaseTypeHandler<T> extends TypeReference<T> implements Typ
         throw new TypeException("JDBC requires that the JdbcType must be specified for all nullable parameters.");
       }
       try {
-        ps.setNull(i, jdbcType.TYPE_CODE);
+        ps.setNull(i, jdbcType.TYPE_CODE);//设置null参数
       } catch (SQLException e) {
         throw new TypeException("Error setting null for parameter #" + i + " with JdbcType " + jdbcType + " . " +
                 "Try setting a different JdbcType for this parameter or a different jdbcTypeForNull configuration property. " +
@@ -50,7 +50,7 @@ public abstract class BaseTypeHandler<T> extends TypeReference<T> implements Typ
       }
     } else {
       try {
-        setNonNullParameter(ps, i, parameter, jdbcType);
+        setNonNullParameter(ps, i, parameter, jdbcType);//设置非null参数
       } catch (Exception e) {
         throw new TypeException("Error setting non null for parameter #" + i + " with JdbcType " + jdbcType + " . " +
                 "Try setting a different JdbcType for this parameter or a different configuration property. " +

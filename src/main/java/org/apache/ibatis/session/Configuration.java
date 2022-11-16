@@ -665,6 +665,9 @@ public class Configuration {
   }
 
   public void addMappedStatement(MappedStatement ms) {
+    //ms.getId = Mapper.xml中resultMap的id
+    //ms = MappedStatement等于每一个增删改查的标签的里的数据
+    //最终存放到mappedStatements中,mappedStatements存放的是一个个的增删改查
     mappedStatements.put(ms.getId(), ms);
   }
 

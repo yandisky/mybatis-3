@@ -48,13 +48,16 @@ public class MapperProxy<T> implements InvocationHandler, Serializable {
   public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
     try {
       if (Object.class.equals(method.getDeclaringClass())) {
+        //判断是否需要去执行SQL还是直接执行方法
         return method.invoke(this, args);
       } else if (isDefaultMethod(method)) {
+        //这里判断的是接口中的默认方法Default等
         return invokeDefaultMethod(proxy, method, args);
       }
     } catch (Throwable t) {
       throw ExceptionUtil.unwrapThrowable(t);
     }
+    //获取缓存,保存了方法签名和接口方法的关系
     final MapperMethod mapperMethod = cachedMapperMethod(method);
     return mapperMethod.execute(sqlSession, args);
   }
